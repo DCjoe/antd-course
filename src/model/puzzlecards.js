@@ -1,3 +1,12 @@
+import request from '../util/request';
+import { message } from 'antd';
+
+const delay = (millisecond) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve,millisecond);
+    })
+};
+
 export default {
     namespace: 'puzzlecards',
     state: {
@@ -14,6 +23,24 @@ export default {
             }
         ],
         counter: 100,
+    },
+    effects:{
+        *queryInitCards(_,sagaEffects){
+            const {call,put} = sagaEffects;
+            const endPointURI = '/dev/random_joke';
+
+            try{
+                const puzzle = yield call(request,endPointURI);
+                yield put({type:'addNewCard',payload:puzzle});
+                yield call(delay,3000);
+
+                const puzzle2 = yield call(request, endPointURI);
+                yield put({ type: 'addNewCard', payload: puzzle2 });
+            }catch (e) {
+                message.error('数据获取失败');
+            }
+
+        }
     },
     reducers: {
         addNewCard(state,{payload: newCard}){
